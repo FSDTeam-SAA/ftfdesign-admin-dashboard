@@ -1,10 +1,9 @@
-import Dashboard from '@/components/dashbord-component/Dashbord'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <Dashboard/>
+      edit product
     </div>
   )
 }

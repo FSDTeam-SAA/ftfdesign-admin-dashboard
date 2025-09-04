@@ -27,13 +27,13 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
-    name: "Products List",
-    href: "/product", 
+    name: "Categories",
+    href: "/category", 
     icon: Package,
   },
   {
-    name: "Requested for Products",
-    href: "/dashboard/requested-prodicts",
+    name: "Live Products",
+    href: "/live-products",
     icon: FileText,
   },
   {
