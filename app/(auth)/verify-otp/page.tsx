@@ -1,10 +1,10 @@
 import React from 'react'
-import ProductMain from './_components/ProductMain'
+import VerifyOtpForm from './_components/VerifyOtp'
 
 const page = () => {
   return (
     <div>
-      <ProductMain/>
+      <VerifyOtpForm/>
     </div>
   )
 }

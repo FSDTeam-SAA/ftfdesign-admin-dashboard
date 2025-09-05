@@ -1,10 +1,9 @@
 import React from 'react'
-import ProductMain from './_components/ProductMain'
 
 const page = () => {
   return (
     <div>
-      <ProductMain/>
+      asdfas
     </div>
   )
 }

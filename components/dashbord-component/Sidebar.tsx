@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
+import { signOut } from "next-auth/react";
 
 const navigation = [
   {
@@ -111,8 +112,9 @@ export function Sidebar() {
       {/* Logout */}
       <div className="p-3">
         <Button
+         onClick={() => signOut({ callbackUrl: "/login" })}
           variant="ghost"
-          className="w-full justify-start gap-3 text-gray-300 hover:bg-[#2a6b7d] hover:text-white"
+          className="w-full justify-start gap-3 text-gray-300 hover:bg-[#EFA610] hover:text-white"
         >
           <LogOut className="h-5 w-5" />
           Log Out

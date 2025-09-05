@@ -1,10 +1,10 @@
 import React from 'react'
-import ProductMain from './_components/ProductMain'
+import ForgotPasswordForm from './_components/FrogetpasswordFrom'
 
 const page = () => {
   return (
     <div>
-      <ProductMain/>
+      <ForgotPasswordForm  />
     </div>
   )
 }

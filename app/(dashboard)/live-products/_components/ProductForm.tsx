@@ -5,8 +5,10 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Upload } from "lucide-react"
+import { Upload, X } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { Textarea } from "@/components/ui/textarea"
+import Image from "next/image"
 
 interface Product {
   id: number
@@ -23,6 +25,19 @@ interface ProductFormProps {
   isEdit?: boolean
 }
 
+interface Category {
+  _id: string
+  title: string
+  thumbnail: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface ImageFile {
+  file: File
+  preview: string
+}
+
 export function ProductForm({ product, isEdit = false }: ProductFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState({
@@ -31,19 +46,63 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
     price: "",
     quantity: "",
     thumbnail: "",
+    description: "",
   })
+  const [images, setImages] = useState<ImageFile[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`)
+        const data = await response.json()
+
+        if (data.success) {
+          setCategories(data.data)
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error)
+      } finally {
+        setLoadingCategories(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
 
   useEffect(() => {
     if (product && isEdit) {
       setFormData({
         name: product.name,
         category: product.category,
-        price: product.price.replace("$", ""), // Remove $ sign for editing
+        price: product.price.replace("$", ""),
         quantity: product.quantity.toString(),
         thumbnail: "",
+        description: "",
       })
     }
   }, [product, isEdit])
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      const newImages = Array.from(files).map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      }))
+      setImages((prev) => [...prev, ...newImages])
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setImages((prev) => {
+      const updatedImages = prev.filter((_, i) => i !== index)
+      // Revoke the object URL to free memory
+      URL.revokeObjectURL(prev[index].preview)
+      return updatedImages
+    })
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,14 +112,20 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
       category: formData.category,
       price: formData.price,
       quantity: formData.quantity,
-      thumbnail: formData.thumbnail,
+      thumbnail: images.length > 0 ? images[0].file : null, // Use first image as thumbnail
+      description: formData.description,
+      additionalImages: images.slice(1), // Additional images
     }
 
     console.log("[v0] Save product:", productData)
+    // Clean up image previews
+    images.forEach((image) => URL.revokeObjectURL(image.preview))
     router.push("/")
   }
 
   const handleCancel = () => {
+    // Clean up image previews
+    images.forEach((image) => URL.revokeObjectURL(image.preview))
     router.push("/")
   }
 
@@ -69,14 +134,14 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className=" text-white px-6 py-4">
-        <h1 className="text-xl font-bold text-[#131313]">{isEdit ? "Edit Product" : "Add Product"}</h1>
+      <div className="text-white px-6 py-4">
+        <h1 className="text-[24px] font-bold text-[#131313]">{isEdit ? "Edit Product" : "Add Product"}</h1>
       </div>
 
       {/* Breadcrumb */}
-      <div className="bg-white px-6 py-3 border-b">
+      <div className="px-6 py-3">
         <div className="flex items-center text-sm text-gray-600">
           <span>Dashboard</span>
           <span className="mx-2">›</span>
@@ -88,71 +153,119 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
 
       {/* Content */}
       <div className="p-6">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Add Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Add Title</label>
-              <Input
-                type="text"
-                placeholder="Add title..."
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                className="w-full"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Price */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                <textarea
-                  placeholder="Add price..."
-                  value={formData.price}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
-                  className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
+              <div className="col-span-3">
+                {/* Add Title */}
+                <div>
+                  <label className="block text-16 font-semibold text-[#131313] mb-2">Add Title</label>
+                  <Input
+                    type="text"
+                    placeholder="Add your title..."
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    className="w-full border border-[#B6B6B6] rounded-md px-3 h-[50px]"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-[23px]">
+                  {/* Price */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                    <Input
+                      placeholder="Add price..."
+                      value={formData.price}
+                      onChange={(e) => handleInputChange("price", e.target.value)}
+                      className="w-full border border-[#B6B6B6] rounded-md px-3 h-[50px]"
+                      required
+                    />
+                  </div>
+                  {/* Quantity */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                    <Input
+                      type="number"
+                      placeholder="Add Quantity..."
+                      value={formData.quantity}
+                      className="w-full border border-[#B6B6B6] rounded-md px-3 h-[50px]"
+                      onChange={(e) => handleInputChange("quantity", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 mt-6">Description</label>
+                <Textarea
+                  placeholder="Add description..."
+                  value={formData.description}
+                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  className="w-full h-[241px] border-[#B6B6B6] rounded-md"
                 />
               </div>
 
               {/* Right Column */}
-              <div className="space-y-6">
-                {/* Quantity */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                  <Input
-                    type="number"
-                    placeholder="Add quantity..."
-                    value={formData.quantity}
-                    onChange={(e) => handleInputChange("quantity", e.target.value)}
-                    required
-                  />
-                </div>
-
+              <div className="space-y-6 col-span-2 ">
                 {/* Category */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => handleInputChange("category", value)}
+                    disabled={loadingCategories}
+                  >
+                    <SelectTrigger className="w-full border border-[#B6B6B6] rounded-md px-3 h-[50px]">
+                      <SelectValue placeholder={loadingCategories ? "Loading categories..." : "Select a category"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="T-Shirt">T-Shirt</SelectItem>
-                      <SelectItem value="Shoes">Shoes</SelectItem>
-                      <SelectItem value="Accessories">Accessories</SelectItem>
-                      <SelectItem value="Pants">Pants</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category._id} value={category._id}>
+                          {category.title}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Thumbnail */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Thumbnail</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Upload thumbnail</p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">Upload images</p>
+                    </label>
                   </div>
+                  {/* Image Previews */}
+                  {images.length > 0 && (
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      {images.map((image, index) => (
+                        <div key={index} className="relative">
+                          <Image
+                            src={image.preview}
+                            width={100}
+                            height={100}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-md"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

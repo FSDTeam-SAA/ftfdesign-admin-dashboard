@@ -1,9 +1,10 @@
 import React from 'react'
+import UpdatePasswordForm from './_components/UpdatePasswordFrom'
 
 const page = () => {
   return (
     <div>
-      edit product
+      <UpdatePasswordForm/>
     </div>
   )
 }
