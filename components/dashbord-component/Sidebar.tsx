@@ -11,12 +11,13 @@ import {
   History,
   Users,
   FileText,
-  DollarSign,
+ PackageSearch ,
   Coins,
   Settings,
   LogOut,
   Menu,
   X,
+  BookOpenText 
 } from "lucide-react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
@@ -29,7 +30,7 @@ const navigation = [
   },
   {
     name: "Categories",
-    href: "/category", 
+    href: "/category",
     icon: Package,
   },
   {
@@ -39,38 +40,61 @@ const navigation = [
   },
   {
     name: "Order History",
-    href: "/dashboard/orders",
+    href: "/order-history",
     icon: History,
   },
   {
-    name: "Employee Profile",
-    href: "/dashboard/employees",
+    name: "Company Request",
+    href: "/company-request",
     icon: Users,
   },
-
   {
-    name: "My Sales",
-    href: "/dashboard/sales",
-    icon: DollarSign,
+    name: "Request for Products",
+    href: "/request-for-products",
+    icon: PackageSearch ,
   },
   {
-    name: "Company Coins",
-    href: "/dashboard/coins",
+    name: "My Wallet",
+    href: "/my-wallet",
     icon: Coins,
   },
   {
-    name: "Setting",
+    name: "Blog Management",
     href: "/dashboard/settings",
+    icon: BookOpenText ,
+  },
+  {
+    name: "Company Profile",
+    href: "/company-profile",
+    icon: Users ,
+  },
+  {
+    name: "Settings",
+    href: "/settings",
     icon: Settings,
   },
 ];
 
 export function Sidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const pathname = usePathname();
 
+  const handleLogout = () => {
+    setIsModalOpen(true);
+  };
+
+  const confirmLogout = () => {
+    setIsModalOpen(false);
+    signOut({ callbackUrl: "/login" });
+  };
+
+  const cancelLogout = () => {
+    setIsModalOpen(false);
+  };
+
   const SidebarContent = () => (
-    <div className="flex h-full flex-col bg-[#035F8A] text-white">
+    <div className="flex h-full flex-col bg-[#035F8A] text-white pt-3">
       {/* Logo */}
       <div className="flex h-16 items-center px-6">
         <div className="flex items-center gap-2">
@@ -94,7 +118,7 @@ export function Sidebar() {
           return (
             <Link
               key={item.name}
-              href={item.href} 
+              href={item.href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
                 isActive
@@ -112,7 +136,7 @@ export function Sidebar() {
       {/* Logout */}
       <div className="p-3">
         <Button
-         onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={handleLogout}
           variant="ghost"
           className="w-full justify-start gap-3 text-gray-300 hover:bg-[#EFA610] hover:text-white"
         >
@@ -153,6 +177,33 @@ export function Sidebar() {
           />
           <div className="fixed inset-y-0 left-0 w-64">
             <SidebarContent />
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold text-gray-900">Confirm Logout</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Are you sure you want to log out?
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={cancelLogout}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmLogout}
+                className="bg-[#035F8A] hover:bg-[#EFA610] text-white"
+              >
+                Log Out
+              </Button>
+            </div>
           </div>
         </div>
       )}

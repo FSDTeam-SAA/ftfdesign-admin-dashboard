@@ -3,12 +3,13 @@
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+
 import { ChevronRight, Upload, X, ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useSession } from "next-auth/react"
 
 interface AddCategoryFormProps {
   initialData?: {
@@ -28,12 +29,14 @@ interface FormErrors {
 export function AddCategoryForm({ initialData, isEdit = false }: AddCategoryFormProps) {
   const router = useRouter()
   const [title, setTitle] = useState(initialData?.name || "")
-  const [description, setDescription] = useState(initialData?.description || "")
+  // const [description, setDescription] = useState(initialData?.description || "")
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
-
+  const session = useSession()
+  const token = session?.data?.accessToken
+  
   // Form validation
   const validateForm = (): FormErrors => {
     const newErrors: FormErrors = {}
@@ -54,14 +57,14 @@ export function AddCategoryForm({ initialData, isEdit = false }: AddCategoryForm
   // TanStack Query mutation for form submission
   const mutation = useMutation({
     mutationFn: async () => {
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGFmOTM4NDVjMjlhOWViZTdiMjIzMjQiLCJlbWFpbCI6InNoYXllZEBnbWFpbC5jb20iLCJyb2xlIjoiY29tcGFueV9hZG1pbiIsImlhdCI6MTc1NjUwNjIwNywiZXhwIjoxNzU3MTExMDA3fQ.LF9dPckyQ7DApyEw6q5KhbwWwYdJA2ru0eoGlHXJgzA"
+   
       
       if (!token && !isEdit) {
         throw new Error("Authentication token not found")
       }
 
       const formData = new FormData()
-      formData.append("data", JSON.stringify({ title, description }))
+      formData.append("data", JSON.stringify({ title }))
       if (selectedImage) {
         formData.append("thumbnail", selectedImage)
       }
@@ -145,7 +148,7 @@ export function AddCategoryForm({ initialData, isEdit = false }: AddCategoryForm
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className=" max-w-4xl ">
           {/* Form Section */}
           <div className="lg:col-span-2">
             <div className="rounded-lg p-6">
@@ -166,14 +169,14 @@ export function AddCategoryForm({ initialData, isEdit = false }: AddCategoryForm
                   {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
                 </div>
 
-                <div>
+                {/* <div>
                   <Textarea
                     placeholder="Description..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full min-h-[200px] resize-none"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -223,8 +226,7 @@ export function AddCategoryForm({ initialData, isEdit = false }: AddCategoryForm
               {errors.thumbnail && <p className="text-red-500 text-sm mt-2">{errors.thumbnail}</p>}
             </div>
           </div>
-        </div>
-
+      
         {/* Action Buttons */}
         <div className="flex justify-end gap-4 mt-8">
           <Button 
@@ -244,6 +246,8 @@ export function AddCategoryForm({ initialData, isEdit = false }: AddCategoryForm
             {mutation.isPending ? "Saving..." : "Save"}
           </Button>
         </div>
+        </div>
+
       </div>
     </div>
   )

@@ -63,8 +63,10 @@ export default function ProductMain() {
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const limit = 10;
   const queryClient = useQueryClient();
-     const session = useSession();
-    const token = session?.data?.accessToken;
+  const session = useSession();
+  const token = session?.data?.accessToken;
+  console.log(token);
+
   const { data: response, isLoading } = useQuery<ApiResponse>({
     queryKey: ['products', currentPage],
     queryFn: async () => {
@@ -79,12 +81,12 @@ export default function ProductMain() {
   const deleteMutation = useMutation({
     mutationFn: async (productId: string) => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/${productId}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       if (!res.ok) {
         throw new Error('Failed to delete product');
       }

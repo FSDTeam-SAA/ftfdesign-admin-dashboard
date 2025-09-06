@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { useMutation } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -9,6 +11,7 @@ import { Upload, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Textarea } from "@/components/ui/textarea"
 import Image from "next/image"
+import { useSession } from "next-auth/react"
 
 interface Product {
   id: number
@@ -38,6 +41,26 @@ interface ImageFile {
   preview: string
 }
 
+const createProduct = async (productFormData: FormData, token: string | undefined) => {
+  if (!token) {
+    throw new Error("Authentication token is missing")
+  }
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/create`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: productFormData,
+  })
+
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to create product")
+  }
+  return data
+}
+
 export function ProductForm({ product, isEdit = false }: ProductFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState({
@@ -51,6 +74,21 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
   const [images, setImages] = useState<ImageFile[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
+  const { data: session } = useSession()
+  const token = session?.accessToken
+
+  const mutation = useMutation({
+    mutationFn: (productFormData: FormData) => createProduct(productFormData, token),
+    onSuccess: () => {
+      toast.success("Product created successfully!")
+      images.forEach((image) => URL.revokeObjectURL(image.preview))
+      router.push("/live-products")
+    },
+    //eslint-disable-next-line
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to create product")
+    },
+  })
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -63,6 +101,7 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
         }
       } catch (error) {
         console.error("Error fetching categories:", error)
+        toast.error("Failed to load categories")
       } finally {
         setLoadingCategories(false)
       }
@@ -98,7 +137,6 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
   const removeImage = (index: number) => {
     setImages((prev) => {
       const updatedImages = prev.filter((_, i) => i !== index)
-      // Revoke the object URL to free memory
       URL.revokeObjectURL(prev[index].preview)
       return updatedImages
     })
@@ -107,26 +145,26 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const productData = {
-      name: formData.name,
-      category: formData.category,
-      price: formData.price,
-      quantity: formData.quantity,
-      thumbnail: images.length > 0 ? images[0].file : null, // Use first image as thumbnail
-      description: formData.description,
-      additionalImages: images.slice(1), // Additional images
+    const productFormData = new FormData()
+    productFormData.append("title", formData.name)
+    productFormData.append("description", formData.description)
+    productFormData.append("price", formData.price)
+    productFormData.append("quantity", formData.quantity)
+    productFormData.append("category", formData.category)
+
+    if (images.length > 0) {
+      productFormData.append("productImage", images[0].file)
+      images.slice(1).forEach((image, index) => {
+        productFormData.append(`additionalImages[${index}]`, image.file)
+      })
     }
 
-    console.log("[v0] Save product:", productData)
-    // Clean up image previews
-    images.forEach((image) => URL.revokeObjectURL(image.preview))
-    router.push("/")
+    mutation.mutate(productFormData)
   }
 
   const handleCancel = () => {
-    // Clean up image previews
     images.forEach((image) => URL.revokeObjectURL(image.preview))
-    router.push("/")
+    router.push("/live-products")
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -136,8 +174,21 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="text-white px-6 py-4">
+      <div className="text-white px-6 py-4 flex justify-between">
         <h1 className="text-[24px] font-bold text-[#131313]">{isEdit ? "Edit Product" : "Add Product"}</h1>
+        <div className="flex justify-end gap-4 pt-6">
+          <Button type="button" variant="outline" onClick={handleCancel} className="px-6 bg-transparent text-[#131313]">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="product-form"
+            className="bg-[#D9AD5E] hover:bg-[#D9AD5E] text-white px-6"
+            disabled={mutation.isPending || !token}
+          >
+            {mutation.isPending ? "Submitting..." : isEdit ? "Update Resource" : "Publish Resource"}
+          </Button>
+        </div>
       </div>
 
       {/* Breadcrumb */}
@@ -154,7 +205,7 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
       {/* Content */}
       <div className="p-6">
         <div className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form id="product-form" onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
               <div className="col-span-3">
                 {/* Add Title */}
@@ -204,7 +255,7 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
               </div>
 
               {/* Right Column */}
-              <div className="space-y-6 col-span-2 ">
+              <div className="space-y-6 col-span-2">
                 {/* Category */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
@@ -268,16 +319,6 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
                   )}
                 </div>
               </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-4 pt-6">
-              <Button type="button" variant="outline" onClick={handleCancel} className="px-6 bg-transparent">
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white px-6">
-                {isEdit ? "Update Resource" : "Publish Resource"}
-              </Button>
             </div>
           </form>
         </div>
