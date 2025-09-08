@@ -81,8 +81,8 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
     mutationFn: (productFormData: FormData) => createProduct(productFormData, token),
     onSuccess: () => {
       toast.success("Product created successfully!")
+      setTimeout(() => router.push("/live-products"), 2000)
       images.forEach((image) => URL.revokeObjectURL(image.preview))
-      router.push("/live-products")
     },
     //eslint-disable-next-line
     onError: (error: any) => {

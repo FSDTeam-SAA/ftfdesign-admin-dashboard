@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
     '/favicon.ico'
   ]
 
-  // Public route হলে skip
+  
   if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
     return NextResponse.next()
   }

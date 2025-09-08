@@ -65,7 +65,7 @@ export default function ProductMain() {
   const queryClient = useQueryClient();
   const session = useSession();
   const token = session?.data?.accessToken;
-  console.log(token);
+  console.log(session?.data);
 
   const { data: response, isLoading } = useQuery<ApiResponse>({
     queryKey: ['products', currentPage],

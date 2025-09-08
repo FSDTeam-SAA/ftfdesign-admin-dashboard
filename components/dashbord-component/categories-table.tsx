@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ChevronRight } from "lucide-react"
 import Link from "next/link"
@@ -14,6 +14,16 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { toast } from "sonner"
+
 
 interface Category {
   _id: string
@@ -38,7 +48,10 @@ interface CategoryResponse {
 
 export function CategoriesTable() {
   const [currentPage, setCurrentPage] = useState(1)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null)
   const limit = 10
+  const queryClient = useQueryClient()
 
   const {
     data: response,
@@ -55,6 +68,27 @@ export function CategoriesTable() {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: async (categoryId: string) => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category/remove/${categoryId}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) {
+        throw new Error("Failed to delete category")
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      toast.success("Category deleted successfully")
+      queryClient.invalidateQueries({ queryKey: ["categories", currentPage, limit] })
+      setIsDeleteModalOpen(false)
+      setCategoryToDelete(null)
+    },
+    onError: () => {
+      toast.error("Failed to delete category")
+    },
+  })
+
   const categories = response?.data || []
   const pagination = response?.pagination
 
@@ -68,6 +102,17 @@ export function CategoriesTable() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
+  }
+
+  const handleDeleteClick = (categoryId: string) => {
+    setCategoryToDelete(categoryId)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (categoryToDelete) {
+      deleteMutation.mutate(categoryToDelete)
+    }
   }
 
   const renderPaginationItems = () => {
@@ -257,7 +302,12 @@ export function CategoriesTable() {
                         <Edit className="w-4 h-4 text-gray-500" />
                       </Button>
                     </Link>
-                    <Button variant="ghost" size="sm" className="p-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-2"
+                      onClick={() => handleDeleteClick(category._id)}
+                    >
                       <Trash2 className="w-4 h-4 text-gray-500" />
                     </Button>
                   </div>
@@ -267,6 +317,36 @@ export function CategoriesTable() {
           </tbody>
         </table>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Category</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this category? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteModalOpen(false)
+                setCategoryToDelete(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer with pagination */}
       <div className="flex items-center justify-between px-6 border-t pt-10">

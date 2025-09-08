@@ -60,7 +60,7 @@ const navigation = [
   },
   {
     name: "Blog Management",
-    href: "/dashboard/settings",
+    href: "/blog-management",
     icon: BookOpenText ,
   },
   {

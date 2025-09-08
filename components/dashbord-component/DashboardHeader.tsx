@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useQuery } from "@tanstack/react-query"
+import { useSession } from "next-auth/react"
 
 // Define the user profile data interface
 interface UserProfile {
@@ -24,9 +25,14 @@ interface UserProfile {
   }
 }
 
-// Fetch user profile function
-const fetchUserProfile = async (): Promise<UserProfile> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`)
+// Fetch user profile function with token in headers
+const fetchUserProfile = async (token: string | undefined): Promise<UserProfile> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
   if (!response.ok) {
     throw new Error("Failed to fetch user profile")
   }
@@ -34,10 +40,15 @@ const fetchUserProfile = async (): Promise<UserProfile> => {
 }
 
 export function DashboardHeader() {
+  // Get session and token
+  const session = useSession()
+  const token = session?.data?.accessToken
+
   // Use Tanstack Query to fetch user profile
   const { data, isLoading, error } = useQuery<UserProfile>({
-    queryKey: ["userProfile"],
-    queryFn: fetchUserProfile,
+    queryKey: ["userProfile", token],
+    queryFn: () => fetchUserProfile(token),
+    enabled: !!token, // Only fetch when token is available
   })
 
   // Get user data or set defaults

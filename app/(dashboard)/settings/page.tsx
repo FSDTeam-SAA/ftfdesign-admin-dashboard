@@ -102,7 +102,7 @@ export default function SettingsPage() {
         formDataToSend.append("image", imageFile)
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/update-profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
