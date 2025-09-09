@@ -151,11 +151,11 @@ export function AddCategoryForm({ initialData, isEdit = false }: AddCategoryForm
         <div className=" max-w-4xl ">
           {/* Form Section */}
           <div className="lg:col-span-2">
-            <div className="rounded-lg p-6">
+            <div className="rounded-lg  ">
               <h2 className="text-lg font-medium text-gray-900 mb-6">General Information</h2>
 
               <div className="space-y-6">
-                <div>
+                <div className="">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Add Title</label>
                   <Input
                     placeholder="Add your title..."
@@ -182,7 +182,7 @@ export function AddCategoryForm({ initialData, isEdit = false }: AddCategoryForm
           </div>
 
           {/* Thumbnail Section */}
-          <div className="lg:col-span-1 border border-gray-200 rounded-lg">
+          <div className="lg:col-span-1 border border-gray-200 rounded-lg mt-5">
             <div className="p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Thumbnail</h3>
 
