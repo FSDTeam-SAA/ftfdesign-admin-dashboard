@@ -37,7 +37,7 @@ interface AssignedProduct {
 }
 
 export function RequestProduct() {
-  const  session  = useSession()
+  const session = useSession()
   const token = session?.data?.accessToken
 
   // Fetch data using TanStack Query with native fetch
@@ -58,6 +58,39 @@ export function RequestProduct() {
     enabled: !!token, // Only fetch when token is available
   })
 
+  // Skeleton Loader Component
+  const SkeletonRow = () => (
+    <tr className="animate-pulse">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center">
+          <div className="w-10 h-10 bg-gray-200 rounded-md mr-3"></div>
+          <div className="h-4 bg-gray-200 rounded w-32"></div>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-200 rounded w-16"></div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-200 rounded w-12"></div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-200 rounded w-24"></div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-200 rounded w-20"></div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-200 rounded w-16"></div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex space-x-2">
+          <div className="h-7 bg-gray-200 rounded w-20"></div>
+          <div className="h-7 bg-gray-200 rounded w-20"></div>
+        </div>
+      </td>
+    </tr>
+  )
+
   return (
     <div className="p-6">
       {/* Header Section */}
@@ -70,12 +103,42 @@ export function RequestProduct() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table or Skeleton/No Data */}
       <div className="overflow-hidden">
         {isLoading ? (
-          <div>Loading...</div>
+          <table className="w-full">
+            <thead className="border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-base font-medium text-[#131313] uppercase tracking-wider">
+                  Product Name
+                </th>
+                <th className="px-6 py-3 text-left text-base font-medium text-[#131313] uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-left text-base font-medium text-[#131313] uppercase tracking-wider">
+                  Quantity
+                </th>
+                <th className="px-6 py-3 text-left text-base font-medium text-[#131313] uppercase tracking-wider">
+                  Company Name
+                </th>
+                <th className="px-6 py-3 text-left text-base font-medium text-[#131313] uppercase tracking-wider">
+                  Employee Id
+                </th>
+                <th className="px-6 py-3 text-left text-base font-medium text-[#131313] uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left pl-10 text-base font-medium text-[#131313] uppercase tracking-wider">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {/* Render multiple skeleton rows for a realistic effect */}
+              {Array(5).fill(0).map((_, index) => (
+                <SkeletonRow key={index} />
+              ))}
+            </tbody>
+          </table>
         ) : error ? (
-          <div>Error fetching products: {error.message}</div>
+          <div className="text-center text-gray-500 py-4">Error fetching products: {error.message}</div>
+        ) : !data || data.length === 0 ? (
+          <div className="text-center text-gray-500 py-4">No data available</div>
         ) : (
           <table className="w-full">
             <thead className="border-b border-gray-200">
@@ -94,7 +157,9 @@ export function RequestProduct() {
                   Employee Id
                 </th>
                 <th className="px-6 py-3 text-left text-base font-medium text-[#131313] uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left pl-10 text-base font-medium text-[#131313] uppercase tracking-wider">Action</th>
+                <th className="px-6 py-3 text-left pl-10 text-base font-medium text-[#131313] uppercase tracking-wider">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">

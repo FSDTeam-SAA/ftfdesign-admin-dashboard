@@ -73,10 +73,12 @@ export function CategoriesTable() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category/remove/${categoryId}`, {
         method: "DELETE",
       })
+      const data = await response.json()
+      // toast.error(data.message)
       if (!response.ok) {
-        throw new Error("Failed to delete category")
+        throw new Error(data.message || "Failed to delete category")
       }
-      return response.json()
+      return data
     },
     onSuccess: () => {
       toast.success("Category deleted successfully")
@@ -84,8 +86,8 @@ export function CategoriesTable() {
       setIsDeleteModalOpen(false)
       setCategoryToDelete(null)
     },
-    onError: () => {
-      toast.error("Failed to delete category")
+    onError: (data) => {
+      toast.error(data.message || "Failed to delete category")
     },
   })
 
