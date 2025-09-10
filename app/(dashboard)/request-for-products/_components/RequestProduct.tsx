@@ -1,8 +1,10 @@
+
 "use client"
 import { Button } from "@/components/ui/button"
 import { ChevronRight } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import Image from "next/image"
 
 // Define TypeScript interfaces for the API response
 interface Product {
@@ -39,6 +41,7 @@ interface AssignedProduct {
 export function RequestProduct() {
   const session = useSession()
   const token = session?.data?.accessToken
+  const queryClient = useQueryClient()
 
   // Fetch data using TanStack Query with native fetch
   const { data, isLoading, error } = useQuery<AssignedProduct[], Error>({
@@ -57,6 +60,54 @@ export function RequestProduct() {
     },
     enabled: !!token, // Only fetch when token is available
   })
+
+  // Mutation to update product status
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/assigned-product/status/${id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      })
+      if (!response.ok) {
+        throw new Error('Failed to update status')
+      }
+      return response.json()
+    },
+    onMutate: async ({ id, status }) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: ['assignedProducts'] })
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(['assignedProducts'])
+
+      // Optimistically update the status
+      queryClient.setQueryData(['assignedProducts'], (old: AssignedProduct[] | undefined) =>
+        old?.map((item) =>
+          item._id === id ? { ...item, status } : item
+        )
+      )
+
+      // Return context with previous data for rollback on error
+      return { previousData }
+    },
+    onError: (err, variables, context) => {
+      // Rollback to previous data on error
+      queryClient.setQueryData(['assignedProducts'], context?.previousData)
+    },
+    onSettled: () => {
+      // Refetch to ensure data is in sync with server
+      queryClient.invalidateQueries({ queryKey: ['assignedProducts'] })
+    },
+  })
+
+  // Handle status update
+  const handleStatusUpdate = (id: string, status: string) => {
+    updateStatusMutation.mutate({ id, status })
+  }
 
   // Skeleton Loader Component
   const SkeletonRow = () => (
@@ -129,7 +180,6 @@ export function RequestProduct() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {/* Render multiple skeleton rows for a realistic effect */}
               {Array(5).fill(0).map((_, index) => (
                 <SkeletonRow key={index} />
               ))}
@@ -168,9 +218,7 @@ export function RequestProduct() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-black rounded-md flex items-center justify-center mr-3">
-                        <span className="text-white text-xs font-bold">
-                          {order.productId.title.slice(0, 2).toUpperCase()}
-                        </span>
+                        <Image src={""} alt={order.productId.title} width={40} height={40} />
                       </div>
                       <span className="text-sm font-medium text-[#424242]">{order.productId.title}</span>
                     </div>
@@ -188,16 +236,24 @@ export function RequestProduct() {
                       <Button
                         size="sm"
                         className={`${
-                          order.status === 'approved' ? 'bg-[#008000] hover:bg-[#008000]' : 'bg-gray-400 hover:bg-gray-400'
+                          order.status === 'approved'
+                            ? 'bg-[#008000] hover:bg-[#008000]'
+                            : 'bg-[#4CAF50] hover:bg-[#45a049]'
                         } text-white text-xs px-3 py-1 h-7`}
-                        disabled={order.status !== 'approved'}
+                        onClick={() => handleStatusUpdate(order._id, 'approved')}
+                        disabled={order.status !== 'pending'}
                       >
-                        Approved
+                        Approve
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-[#FF5858] hover:bg-[#FF5858] text-white text-xs px-3 py-1 h-7"
-                        disabled={order.status === 'approved'}
+                        className={`${
+                          order.status === 'rejected'
+                            ? 'bg-[#FF5858] hover:bg-[#FF5858]'
+                            : 'bg-[#FF0000] hover:bg-[#e60000]'
+                        } text-white text-xs px-3 py-1 h-7`}
+                        onClick={() => handleStatusUpdate(order._id, 'rejected')}
+                        disabled={order.status !== 'pending'}
                       >
                         Cancel
                       </Button>
