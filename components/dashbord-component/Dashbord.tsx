@@ -1,16 +1,17 @@
-"use client"
+"use client";
 
-import { NewProductsChart } from "@/components/dashbord-component/new-products-chart"
-import { ProductSellChart } from "@/components/dashbord-component/product-sell-Chart"
-import { RevenueRatioChart } from "@/components/dashbord-component/revenue-ratio-chart"
-import { RevenueReportChart } from "@/components/dashbord-component/revenue-report-chart"
-import { StatCard } from "@/components/dashbord-component/stat-card"
-
-
-
-
+import  NewProductsChart  from "@/components/dashbord-component/new-products-chart";
+import { ProductSellChart } from "@/components/dashbord-component/product-sell-Chart";
+// import { RevenueRatioChart } from "@/components/dashbord-component/revenue-ratio-chart";
+import { RevenueReportChart } from "@/components/dashbord-component/revenue-report-chart";
+import { StatCard } from "@/components/dashbord-component/stat-card";
+import { StatCardsSkeleton } from "@/components/dashbord-component/stat-card-skeleton";
+import { DashboardError } from "@/components/dashbord-component/dashboard-error";
+import { useFormattedDashboardStats } from "@/hooks/useDashboard";
 
 export default function Dashboard() {
+  const { stats, isLoading, error, refetch, isRefetching } =
+    useFormattedDashboardStats();
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -21,46 +22,33 @@ export default function Dashboard() {
           <p className="text-base text-[#929292] mt-3">Dashboard</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard
-            title="Total Revenue"
-            value="132,570"
-            icon="/assets/icon1.png"
-            iconColor="text-blue-600"
-            iconBgColor="bg-blue-100"
+        {/* Stats Cards */}
+        {isLoading ? (
+          <StatCardsSkeleton />
+        ) : error ? (
+          <DashboardError
+            error={error}
+            onRetry={() => refetch()}
+            isRetrying={isRefetching}
           />
-          <StatCard
-            title="Product Request"
-            value="10000"
-            icon="/assets/icon2.png"
-            iconColor="text-green-600"
-            iconBgColor="bg-green-100"
-          />
-          <StatCard
-            title="Live Product"
-            value="132,570"
-             icon="/assets/icon3.png"
-            iconColor="text-purple-600"
-            iconBgColor="bg-purple-100"
-          />
-          <StatCard
-            title="Total Company"
-            value="132,570"
-           icon="/assets/icon4.png"
-            iconColor="text-orange-600"
-            iconBgColor="bg-orange-100"
-          />
-          <StatCard
-            title="Company Request"
-            value="2329"
-          icon="/assets/icon5.png"
-            iconColor="text-blue-600"
-            iconBgColor="bg-blue-100"
-          />
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {stats.map((stat, index) => (
+              <StatCard
+                key={`${stat.title}-${index}`}
+                title={stat.title}
+                value={stat.value}
+                icon={stat.icon}
+                iconColor={stat.iconColor}
+                iconBgColor={stat.iconBgColor}
+              />
+            ))}
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <RevenueRatioChart />
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* <RevenueRatioChart /> */}
           <NewProductsChart />
           <ProductSellChart />
         </div>
@@ -68,5 +56,5 @@ export default function Dashboard() {
         <RevenueReportChart />
       </div>
     </div>
-  )
+  );
 }
