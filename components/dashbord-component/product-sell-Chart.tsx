@@ -170,7 +170,7 @@ export function ProductSellChart(): JSX.Element {
           <CardTitle className="text-lg font-semibold text-gray-900">
             Product Sell
           </CardTitle>
-          <button
+          {/* <button
             onClick={handleRefresh}
             className="text-sm text-blue-600 hover:underline flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isLoading}
@@ -192,7 +192,7 @@ export function ProductSellChart(): JSX.Element {
                 d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
               />
             </svg>
-          </button>
+          </button> */}
         </div>
       </CardHeader>
       <CardContent className="pt-0">
