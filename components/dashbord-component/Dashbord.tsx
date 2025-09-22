@@ -1,6 +1,6 @@
 "use client";
 
-import  NewProductsChart  from "@/components/dashbord-component/new-products-chart";
+import NewProductsChart from "@/components/dashbord-component/new-products-chart";
 import { ProductSellChart } from "@/components/dashbord-component/product-sell-Chart";
 // import { RevenueRatioChart } from "@/components/dashbord-component/revenue-ratio-chart";
 import { RevenueReportChart } from "@/components/dashbord-component/revenue-report-chart";
