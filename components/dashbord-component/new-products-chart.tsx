@@ -13,12 +13,15 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { useSession } from "next-auth/react";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/dashboard/admin-new-products-report`;
 
 // Fetch function for the API
-const fetchNewProductsReport = async () => {
-  const response = await fetch(API_URL);
+const fetchNewProductsReport = async (token:string) => {
+  const response = await fetch(API_URL, {headers:{
+    Authorization: `Bearer ${token}`,
+  }});
   if (!response.ok) {
     throw new Error("Failed to fetch new products report");
   }
@@ -26,23 +29,23 @@ const fetchNewProductsReport = async () => {
   return result.data;
 };
 
-const timeFilters = [
-  { label: "Day", key: "day" },
-  { label: "Week", key: "week" },
-  { label: "Month", key: "month" },
-  { label: "Year", key: "year" },
-];
+// const timeFilters = [
+//   { label: "Day", key: "day" },
+//   { label: "Week", key: "week" },
+//   { label: "Month", key: "month" },
+//   { label: "Year", key: "year" },
+// ];
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 export default function NewProductsChart() {
-  const [activeFilter, setActiveFilter] = useState("month");
+  // const [activeFilter, setActiveFilter] = useState("month");
   const [viewType, setViewType] = useState("bar"); // "bar" or "pie"
-
+  const {data:session} = useSession()
   // TanStack Query to fetch data
   const { data, isLoading, error } = useQuery({
     queryKey: ["newProductsReport"],
-    queryFn: fetchNewProductsReport,
+    queryFn: ()=> fetchNewProductsReport(session?.accessToken as string),
     refetchInterval: 30000, // Refetch every 30 seconds
     staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
   });
@@ -158,7 +161,7 @@ export default function NewProductsChart() {
         </div>
 
         {/* Time Filters */}
-        <div className="flex gap-1 mt-3">
+        {/* <div className="flex gap-1 mt-3">
           {timeFilters.map((filter) => (
             <button
               key={filter.key}
@@ -172,7 +175,7 @@ export default function NewProductsChart() {
               {filter.label}: {data ? data[filter.key] : 0}
             </button>
           ))}
-        </div>
+        </div> */}
 
         {/* Summary */}
         <div className="mt-3 text-sm text-gray-600">

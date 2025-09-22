@@ -11,16 +11,17 @@ import {
   History,
   Users,
   FileText,
- PackageSearch ,
+  PackageSearch,
   Coins,
   Settings,
   LogOut,
   Menu,
   X,
-  BookOpenText 
+  BookOpenText,
 } from "lucide-react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
+import logo from "../../public/assets/logo.png";
 
 const navigation = [
   {
@@ -51,7 +52,7 @@ const navigation = [
   {
     name: "Request for Products",
     href: "/request-for-products",
-    icon: PackageSearch ,
+    icon: PackageSearch,
   },
   {
     name: "My Wallet",
@@ -61,12 +62,12 @@ const navigation = [
   {
     name: "Blog Management",
     href: "/blog-management",
-    icon: BookOpenText ,
+    icon: BookOpenText,
   },
   {
     name: "Company Profile",
     href: "/company-profile",
-    icon: Users ,
+    icon: Users,
   },
   {
     name: "Settings",
@@ -96,11 +97,11 @@ export function Sidebar() {
   const SidebarContent = () => (
     <div className="flex h-full flex-col bg-[#035F8A] text-white pt-3">
       {/* Logo */}
-      <div className="flex h-16 items-center px-6">
-        <div className="flex items-center gap-2">
+      <div className="flex h-16 items-center justify-center px-6">
+        <div className="flex items-center  gap-2">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/assets/logo.png"
+              src={logo}
               alt="GratiSwag Logo"
               width={104}
               height={64}
@@ -185,7 +186,9 @@ export function Sidebar() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold text-gray-900">Confirm Logout</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Confirm Logout
+            </h2>
             <p className="mt-2 text-sm text-gray-600">
               Are you sure you want to log out?
             </p>
