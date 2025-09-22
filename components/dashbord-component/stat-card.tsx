@@ -16,7 +16,7 @@ export function StatCard({
   return (
     <Card className="!bg-transparent !shadow-none">
       <CardContent className="p-4 h-[120px]">
-        <div className="flex items-center gap-x-[32px]">
+        <div className="flex items-center justify-between gap-x-[32px]">
           <div>
             <p className="text-xl font-bold text-[#131313]">{title}</p>
             <p className="text-[18px] font-semibold text-[#424242] mt-2">
