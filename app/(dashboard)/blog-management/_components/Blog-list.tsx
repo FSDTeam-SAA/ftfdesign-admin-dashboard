@@ -213,10 +213,10 @@ export function BlogList({ onAddBlog }: BlogListProps) {
             {/* Table */}
             <div className="overflow-hidden">
                 <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-t border-gray comissão de ética e disciplina200 text-sm font-medium text-gray-700">
-                    <div className="col-span-5 text-base text-[#131313] font-bold">Blog Name</div>
+                    <div className="col-span-6 text-base text-[#131313] font-bold">Blog Name</div>
                     <div className="col-span-2 text-base text-[#131313] font-bold">Added</div>
                     <div className="col-span-2 text-base text-[#131313] font-bold">Comments</div>
-                    <div className="col-span-3 text-base text-[#131313] font-bold">Action</div>
+                    <div className="col-span-2 text-base text-[#131313] font-bold">Action</div>
                 </div>
 
                 {isLoading ? (
@@ -229,7 +229,7 @@ export function BlogList({ onAddBlog }: BlogListProps) {
                             key={post._id}
                             className="grid grid-cols-12 gap-4 p-4 items-center border-b border-gray-100"
                         >
-                            <div className="col-span-5 flex items-start gap-3">
+                            <div className="col-span-6 flex items-start gap-3">
                                 <div className="w-[120px] h-[100px] rounded-lg overflow-hidden flex-shrink-0">
                                     <Image
                                         src={post.image || "/placeholder.svg"}
@@ -251,7 +251,7 @@ export function BlogList({ onAddBlog }: BlogListProps) {
                                 {new Date(post.createdAt).toLocaleString()}
                             </div>
                             <div className="col-span-2 text-sm text-[#424242]">0</div>
-                            <div className="col-span-3 flex items-center gap-2">
+                            <div className="col-span-2 flex items-center gap-2">
                                 <Link href={`/blog-management/edit/${post._id}`}>
 
                                 <button  className="p-2 text-[#424242] transition-colors">
