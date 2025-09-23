@@ -279,6 +279,8 @@ export function BlogList({ onAddBlog }: BlogListProps) {
                             {Math.min(data.meta.page * data.meta.limit, data.meta.total)} of {data.meta.total} results
                         </span>
                     </div>
+                    <div>
+
                     {data.meta.totalPages > 1 && (
                         <Pagination>
                             <PaginationContent>
@@ -302,6 +304,7 @@ export function BlogList({ onAddBlog }: BlogListProps) {
                             </PaginationContent>
                         </Pagination>
                     )}
+                    </div>
                 </div>
             )}
         </div>

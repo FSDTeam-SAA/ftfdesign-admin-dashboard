@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import { useState } from "react"
@@ -10,6 +12,7 @@ import Image from "next/image"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/components/ui/pagination"
 import { toast } from "sonner"
 import { useSession } from "next-auth/react"
+import jsPDF from "jspdf"
 
 interface User {
   _id: string
@@ -142,6 +145,38 @@ export default function CompanyProfileRequest() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
+  }
+
+  const handleDownloadPDF = (company: CompanyRequest) => {
+    try {
+      const doc = new jsPDF()
+      
+      // Set font and styles
+      doc.setFont("helvetica", "normal")
+      doc.setFontSize(16)
+      
+      // Add title
+      doc.text("Company Profile Details", 20, 20)
+      
+      // Add company details
+      doc.setFontSize(12)
+      doc.text(`Company Unique Id: ${company.companyId}`, 20, 40)
+      doc.text(`Company Name: ${company.companyName}`, 20, 50)
+      doc.text(`Company Address: ${company.companyAddress}`, 20, 60)
+      doc.text(`Subscription Employees: ${company.subscriptionEmployees}`, 20, 70)
+      doc.text(`Total Given Coin: $${company.totalGivenCoin.toFixed(2)}`, 20, 80)
+      doc.text(`Subscription Plan: ${company.subscriptionPlan}`, 20, 90)
+      doc.text(`Subscription Start Date: ${new Date(company.subscriptionStartDate).toLocaleDateString()}`, 20, 100)
+      doc.text(`Subscription End Date: ${new Date(company.subscriptionEndDate).toLocaleDateString()}`, 20, 110)
+      doc.text(`Status: ${company.status}`, 20, 120)
+      doc.text(`Created At: ${new Date(company.createdAt).toLocaleDateString()} ${new Date(company.createdAt).toLocaleTimeString()}`, 20, 130)
+      
+      // Save the PDF
+      doc.save(`${company.companyName}_profile.pdf`)
+      toast.success("PDF downloaded successfully")
+    } catch (error) {
+      toast.error(`Failed to generate PDF: ${(error as Error).message}`)
+    }
   }
 
   const renderPaginationItems = () => {
@@ -282,14 +317,14 @@ export default function CompanyProfileRequest() {
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         size="sm"
-                        className="bg-[#008000] hover:bg-[#006600] py-1 cursor-pointer"
+                        className="bg-[#008000] hover:bg-[#006600] h-[30px] w-[100px] cursor-pointer"
                         onClick={() => handleApprove(company._id)}
                         disabled={company.status === "approved" || approveMutation.isPending}
                       >
                         Approve
                       </Button>
                       <Badge
-                        className="bg-[#1059EF] hover:bg-[#1059EF] text-white py-1 cursor-pointer"
+                        className="bg-[#1059EF] hover:bg-[#1059EF] text-white h-[30px] w-[100px] cursor-pointer"
                         onClick={() => handleSeeDetails(company)}
                       >
                         See Details
@@ -297,7 +332,7 @@ export default function CompanyProfileRequest() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        className="bg-[#FF5858] hover:bg-[#FF5858] py-1 cursor-pointer"
+                        className="bg-[#FF5858] hover:bg-[#FF5858] h-[30px] w-[100px] cursor-pointer"
                         onClick={() => handleReject(company._id)}
                         disabled={company.status === "rejected" || rejectMutation.isPending}
                       >
@@ -341,7 +376,7 @@ export default function CompanyProfileRequest() {
                 {/* Company Unique Id */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-700 mb-1">Company Unique Id</h3>
-                  <p className="text-[#424242] font-medium">{selectedCompany._id}</p>
+                  <p className="text-[#424242] font-medium">{selectedCompany.companyId}</p>
                 </div>
 
                 {/* Company Name */}
@@ -387,8 +422,11 @@ export default function CompanyProfileRequest() {
                 </div>
 
                 {/* Download Button */}
-                <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3">
-                  Download
+                <Button 
+                  className="w-full bg-yellow-500 hover:bg-yellow-500/90 text-white font-medium py-3 !border-none"
+                  onClick={() => handleDownloadPDF(selectedCompany)}
+                >
+                  Download 
                 </Button>
               </div>
             )}

@@ -25,7 +25,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} antialiased`}>
+      <body className={`${manrope.className} antialiased`}>
         {/* Providers: QueryClientProvider + SessionProvider */}
         <Providers>
           <SessionProvider>

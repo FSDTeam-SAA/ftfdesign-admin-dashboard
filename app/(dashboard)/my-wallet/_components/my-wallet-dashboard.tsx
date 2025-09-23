@@ -7,7 +7,7 @@ import {
   Eye,
   X,
   Calendar,
-  CreditCard,
+  
   Building2,
   Package,
   Coins,
@@ -195,13 +195,13 @@ const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <CreditCard className="h-5 w-5 text-purple-600" />
-              <div>
+              {/* <CreditCard className="h-5 w-5 text-purple-600" /> */}
+              {/* <div>
                 <p className="text-sm text-gray-500">Transaction ID</p>
                 <p className="font-medium text-gray-900 break-all">
                   {payment.transactionId}
                 </p>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex items-center gap-3">
@@ -372,13 +372,13 @@ const MyWalletDashboard: React.FC = () => {
           </div>
 
           {/* Revenue Card */}
+        </div>
           <div className="bg-[#035F8A] rounded-lg p-6 text-white mb-8 max-w-[470px] w-full">
             <h2 className="text-lg font-medium mb-2">Total Revenue</h2>
             <p className="text-3xl font-bold">
               ${data?.data?.totalRevenue ?? 0}
             </p>
           </div>
-        </div>
 
         {/* Tab Navigation */}
         <div className="mb-4">

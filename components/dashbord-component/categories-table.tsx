@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import { useSession } from "next-auth/react"
 
 
 interface Category {
@@ -52,6 +53,8 @@ export function CategoriesTable() {
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null)
   const limit = 10
   const queryClient = useQueryClient()
+  const session = useSession()
+  const token = session?.data?.accessToken
 
   const {
     data: response,
@@ -72,6 +75,9 @@ export function CategoriesTable() {
     mutationFn: async (categoryId: string) => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category/remove/${categoryId}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
       const data = await response.json()
       // toast.error(data.message)
