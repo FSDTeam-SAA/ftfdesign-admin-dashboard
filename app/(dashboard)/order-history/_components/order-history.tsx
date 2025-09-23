@@ -560,12 +560,13 @@ export function OrderHistory() {
               </div>
             )}
           </div>
-
+            <div>
           {data.meta.totalPages > 1 && (
             <Pagination>
               <PaginationContent>{renderPaginationItems()}</PaginationContent>
             </Pagination>
           )}
+            </div>
         </div>
       )}
     </div>

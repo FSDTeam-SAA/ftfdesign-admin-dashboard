@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, ChangeEvent } from "react"
-import { ChevronRight, Eye, EyeOff, Edit, Upload } from "lucide-react"
+import { ChevronRight, Eye, EyeOff, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -330,12 +330,9 @@ export default function SettingsPage() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="border-[#616161] h-[40px]"
+                  className="border-[#616161] h-[40px] w-[400px]"
                 />
-                <Button className="bg-[#EFA610] hover:bg-[#EFA610] text-white">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload
-                </Button>
+              
               </div>
             </div>
           )}
