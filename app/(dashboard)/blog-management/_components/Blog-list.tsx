@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -139,8 +141,8 @@ export function BlogList({ onAddBlog }: BlogListProps) {
 
     // Skeleton Loader Component
     const SkeletonRow = () => (
-        <div className="grid grid-cols-12 gap-4 p-4 items-center border-b border-gray-100">
-            <div className="col-span-5 flex items-start gap-3">
+        <div className="grid grid-cols-12 gap-4 p-4 items-center border-b border-gray-100 hover:bg-gray-50 transition">
+            <div className="col-span-6 flex items-start gap-3">
                 <div className="w-[120px] h-[100px] rounded-lg shimmer" />
                 <div className="flex-1 min-w-0">
                     <div className="h-5 w-3/4 shimmer rounded mb-2" />
@@ -148,13 +150,10 @@ export function BlogList({ onAddBlog }: BlogListProps) {
                     <div className="h-4 w-5/6 shimmer rounded" />
                 </div>
             </div>
-            <div className="col-span-2">
+            <div className="col-span-3">
                 <div className="h-4 w-2/3 shimmer rounded" />
             </div>
-            <div className="col-span-2">
-                <div className="h-4 w-1/3 shimmer rounded" />
-            </div>
-            <div className="col-span-3 flex items-center gap-2">
+            <div className="col-span-3 flex justify-end gap-2">
                 <div className="h-6 w-6 shimmer rounded" />
                 <div className="h-6 w-6 shimmer rounded" />
             </div>
@@ -162,7 +161,7 @@ export function BlogList({ onAddBlog }: BlogListProps) {
     )
 
     return (
-        <div className="p-6">
+        <div className="p-6 w-full border-none">
             <style>{shimmerStyles}</style>
 
             {/* Confirmation Modal */}
@@ -194,11 +193,11 @@ export function BlogList({ onAddBlog }: BlogListProps) {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-semibold text-gray-900 mb-1">Blog management</h1>
+                    <h1 className="text-2xl font-semibold text-gray-900 mb-1">Blog Management</h1>
                     <div className="flex items-center text-sm text-gray-500">
                         <span>Dashboard</span>
                         <span className="mx-2">{">"}</span>
-                        <span>Blog management</span>
+                        <span>Blog Management</span>
                     </div>
                 </div>
                 <Button
@@ -206,36 +205,35 @@ export function BlogList({ onAddBlog }: BlogListProps) {
                     className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
                 >
                     <Plus size={16} />
-                    Add blog
+                    Add Blog
                 </Button>
             </div>
 
             {/* Table */}
-            <div className="overflow-hidden">
-                <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-t border-gray comissão de ética e disciplina200 text-sm font-medium text-gray-700">
+            <div className="overflow-x-auto rounded-lg shadow-sm">
+                <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-[#B6B6B6] text-sm font-medium text-gray-700">
                     <div className="col-span-6 text-base text-[#131313] font-bold">Blog Name</div>
-                    <div className="col-span-2 text-base text-[#131313] font-bold">Added</div>
-                    <div className="col-span-2 text-base text-[#131313] font-bold">Comments</div>
-                    <div className="col-span-2 text-base text-[#131313] font-bold">Action</div>
+                    <div className="col-span-3 text-base text-[#131313] font-bold text-center">Added</div>
+                    <div className="col-span-3 text-base text-[#131313] font-bold text-right">Action</div>
                 </div>
 
                 {isLoading ? (
                     Array(5).fill(0).map((_, index) => <SkeletonRow key={index} />)
                 ) : error ? (
-                    <div>Error: {(error as Error).message}</div>
+                    <div className="p-4 text-red-500 text-center">Error: {(error as Error).message}</div>
                 ) : (
                     data?.data.map((post) => (
                         <div
                             key={post._id}
-                            className="grid grid-cols-12 gap-4 p-4 items-center border-b border-gray-100"
+                            className="grid grid-cols-12 gap-4 p-4 items-center border-b border-[#B6B6B6] hover:bg-gray-50 transition"
                         >
                             <div className="col-span-6 flex items-start gap-3">
                                 <div className="w-[120px] h-[100px] rounded-lg overflow-hidden flex-shrink-0">
                                     <Image
                                         src={post.image || "/placeholder.svg"}
                                         alt={post.blogTitle}
-                                        width={100}
-                                        height={1000}
+                                        width={120}
+                                        height={100}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
@@ -247,19 +245,17 @@ export function BlogList({ onAddBlog }: BlogListProps) {
                                     />
                                 </div>
                             </div>
-                            <div className="col-span-2 text-sm text-gray-600">
+                            <div className="col-span-3 text-sm text-gray-600 text-center">
                                 {new Date(post.createdAt).toLocaleString()}
                             </div>
-                            <div className="col-span-2 text-sm text-[#424242]">0</div>
-                            <div className="col-span-2 flex items-center gap-2">
+                            <div className="col-span-3 flex justify-end items-center gap-2">
                                 <Link href={`/blog-management/edit/${post._id}`}>
-
-                                <button  className="p-2 text-[#424242] transition-colors">
-                                    <Edit size={16} />
-                                </button>
+                                    <button className="p-2 text-[#424242] hover:text-amber-500 transition-colors">
+                                        <Edit size={16} />
+                                    </button>
                                 </Link>
                                 <button
-                                    className="p-2 text-[#424242] transition-colors"
+                                    className="p-2 text-[#424242] hover:text-red-500 transition-colors"
                                     onClick={() => handleDeleteClick(post._id)}
                                 >
                                     <Trash2 size={16} />
@@ -280,30 +276,29 @@ export function BlogList({ onAddBlog }: BlogListProps) {
                         </span>
                     </div>
                     <div>
-
-                    {data.meta.totalPages > 1 && (
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationPrevious
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault()
-                                        if (currentPage > 1) setCurrentPage(currentPage - 1)
-                                    }}
-                                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                                />
-                                {renderPaginationItems()}
-                                <PaginationNext
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault()
-                                        if (currentPage < data.meta.totalPages) setCurrentPage(currentPage + 1)
-                                    }}
-                                    className={currentPage === data.meta.totalPages ? "pointer-events-none opacity-50" : ""}
-                                />
-                            </PaginationContent>
-                        </Pagination>
-                    )}
+                        {data.meta.totalPages > 1 && (
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationPrevious
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            if (currentPage > 1) setCurrentPage(currentPage - 1)
+                                        }}
+                                        className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                    {renderPaginationItems()}
+                                    <PaginationNext
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            if (currentPage < data.meta.totalPages) setCurrentPage(currentPage + 1)
+                                        }}
+                                        className={currentPage === data.meta.totalPages ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationContent>
+                            </Pagination>
+                        )}
                     </div>
                 </div>
             )}
